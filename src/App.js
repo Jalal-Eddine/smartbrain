@@ -86,6 +86,11 @@ class App extends Component {
 // response is an array of percentage
 // calculateFaceLocation turn it to usable values which passed to the state by displayFaceBox
 onButtonSubmit = () => {
+/* we can do this too 
+this.setState({imageUrl: this.state.input}, () => {
+  ---> do something after the state of the imageUrl change
+});
+*/
   this.setState({imageUrl: this.state.input});
   app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
     .then(response => {
@@ -100,7 +105,7 @@ onButtonSubmit = () => {
           .then(response => response.json())
           .then(count => {
             this.setState(Object.assign(this.state.user, { entries: count}))
-            //object.assign update only part of object
+            //object.assign update only part of object which is here entries
           })
       }
       this.displayFaceBox(this.calculateFaceLocation(response))
@@ -114,7 +119,6 @@ onButtonSubmit = () => {
   } else if (route === 'home'){
     this.setState({isSignedIn: true})}
     this.setState({route: route})
-    // console.log(this.state.route)
   }
 
   render() {
@@ -137,8 +141,6 @@ onButtonSubmit = () => {
         <Signin loadUser={this.loadUser} onRouteChange= {this.onRouteChange} on/>
         : <Register loadUser={this.loadUser} onRouteChange= {this.onRouteChange} on/>
          } 
-        
-        {/* <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/> */}
       </div>
     );
   }
