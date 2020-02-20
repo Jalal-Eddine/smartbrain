@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
 import Navigation from './components/Navigation/Navigation'
 import Signin from './components/Signin/Signin';
 import Register from './components/Register/Register';
@@ -11,10 +10,6 @@ import Rank from './components/Rank/Rank'
 import Logo from './components/Logo/Logo'
 import 'tachyons'
 
-//Part of Clarifai API way of using
-const app = new Clarifai.App({
-  apiKey: 'f3e013455e1742eab3618934c65ac9bc'
- });
 
 // particules API for the interactive background 
 const particlesOptions = {
@@ -28,11 +23,8 @@ const particlesOptions = {
     }
   }
 }
-
-class App extends Component {
-  constructor() {
-    super()
-    this.state = {
+const initialStatte = 
+    {
       input: '',
       imageUrl: '',
       box: {},
@@ -45,7 +37,12 @@ class App extends Component {
         entries: 0,
         joined: ''
       }
-      }
+    }
+
+class App extends Component {
+  constructor() {
+    super()
+    this.state = initialStatte
     }
   
   loadUser = (data) => {
@@ -85,14 +82,21 @@ class App extends Component {
 //this.state.imageURL wouldn't worked in .predict() bc setState is Async
 // response is an array of percentage
 // calculateFaceLocation turn it to usable values which passed to the state by displayFaceBox
-onButtonSubmit = () => {
 /* we can do this too 
 this.setState({imageUrl: this.state.input}, () => {
   ---> do something after the state of the imageUrl change
 });
 */
+onButtonSubmit = () => {
   this.setState({imageUrl: this.state.input});
-  app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
+  fetch('http://localhost:3000/imageurl', {
+          method: 'post',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            input: this.state.input
+          })
+        })
+    .then(response => response.json())
     .then(response => {
       if (response) {
         fetch('http://localhost:3000/image', {
@@ -107,15 +111,16 @@ this.setState({imageUrl: this.state.input}, () => {
             this.setState(Object.assign(this.state.user, { entries: count}))
             //object.assign update only part of object which is here entries
           })
+          .catch(console.log)
       }
       this.displayFaceBox(this.calculateFaceLocation(response))
     })
     .catch(err => console.log(err)); 
 }
-
+// 
   onRouteChange = (route) => {
     if(route === 'signout')
-    {this.setState({isSignedIn: false})
+    {this.setState(initialStatte)
   } else if (route === 'home'){
     this.setState({isSignedIn: true})}
     this.setState({route: route})
